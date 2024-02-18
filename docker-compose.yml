@@ -1,0 +1,59 @@
+version: '3.6'
+
+services:
+  db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: "${DB_NAME:-postgres}"
+      POSTGRES_USER: "${DB_USER:-postgres}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-postgres}"
+    healthcheck:
+      # ensure postgress is running before web starts
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      target: dev-stage
+    depends_on:
+      - db
+    user: "${CURRENT_UID:-1000:1000}"
+    command:
+      [
+        "python",
+        "manage.py",
+        "runserver",
+        "0.0.0.0:${LOCAL_DJANGO_PORT:-8080}"
+      ]
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - ${LOCAL_DJANGO_PORT:-8080}:${LOCAL_DJANGO_PORT:-8080}
+    env_file:
+      - .env
+
+  pytest:
+    build:
+      context: .
+      target: test-stage
+    image: "${PROJECT_NAME}-dev"
+    user: "${CURRENT_UID:-1000:1000}"
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+
+volumes:
+  pgdata:
+
+
+networks:
+  default:
+    name: bhub-local
+    external: true
