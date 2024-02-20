@@ -28,6 +28,8 @@ FROM base-stage as dev-stage
 
 RUN pip install -r requirements_dev.txt
 
+ENTRYPOINT [ "python", "manage.py" ]
+
 FROM base-stage AS prod-stage
 
 ENTRYPOINT [ "python", "manage.py", "runserver", "0.0.0.0:80" ]
