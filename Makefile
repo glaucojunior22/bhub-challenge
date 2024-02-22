@@ -19,3 +19,6 @@ initial-build:
 
 nuke:
 	docker compose down --volumes
+
+test:
+	docker compose run --rm web test
