@@ -18,12 +18,6 @@ RUN pip install -r requirements.txt
 # copy project
 COPY . .
 
-FROM base-stage as test-stage
-
-RUN pip install -r requirements_dev.txt
-
-ENTRYPOINT ["pytest", "--cov=.", "--cov-report=html","--cov-context=test"]
-
 FROM base-stage as dev-stage
 
 RUN pip install -r requirements_dev.txt
